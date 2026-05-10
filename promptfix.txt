@@ -1,0 +1,35 @@
+Act as an Expert Full-Stack Developer and Project Manager. I want to build a Multi-Tenant SaaS web application called "Bagi Qurban" (domain: bagiquorban.my.id) for managing the distribution of Qurban meat. 
+
+TECH STACK:
+- Backend: Laravel 13
+- Database: MySQL
+- Frontend: Tailwind CSS, Blade Templates
+- Libraries: html5-qrcode (for scanning), Canvas API (for coupon rendering)
+- UI/UX Style: Clean, modern, intuitive for field workers, dengan sentuhan desain estetis dan sinematik pada elemen visual/kuponnya.
+
+ARCHITECTURE & MULTI-TENANCY:
+The system uses an Organization-based multi-tenant architecture. Data must be strictly isolated using an `organization_id` global scope.
+
+DATABASE SCHEMA (Create Migrations & Models for these):
+1. `organizations`: id, name, slug (unique), city, address, logo, timestamps.
+2. `users`: id, organization_id (FK), name, email, password, role (enum: 'admin', 'panitia'), timestamps.
+3. `coupons`: id, organization_id (FK), created_by (FK users), approved_by (FK users, nullable), recipient_name (nullable), qr_code (unique string/UUID), quantity (integer, default 1), status (enum: 'pending', 'approved', 'claimed'), approved_at (timestamp, nullable), claimed_at (timestamp, nullable), timestamps.
+
+BUSINESS LOGIC & WORKFLOW:
+1. Roles: 
+   - 'admin': Can manage organization profile, create 'panitia' accounts, create coupons, approve coupons, and view full reports.
+   - 'panitia': Can create coupons (status 'pending') and scan QR codes. Cannot see other organizations' data.
+2. Coupon Flow:
+   - Creation: Panitia/Admin creates coupons -> status is 'pending'.
+   - Approval: Admin reviews pending coupons -> clicks approve -> status changes to 'approved', 'approved_by' is filled.
+   - Print: Only 'approved' coupons can be rendered into a printable layout (e.g., A4 grid layout using CSS @media print).
+   - Scan: Panitia scans physical QR. System validates: QR must exist, belong to the current user's organization_id, and status must be 'approved'. If valid, change status to 'claimed'.
+
+EXECUTION PLAN (Please execute step-by-step):
+Step 1: Set up the Laravel models, migrations, and relationships based on the schema above. Implement the Global Scope for `organization_id` on Users and Coupons.
+Step 2: Create the UI layout (Blade + Tailwind) focusing on a clean Dashboard, including a responsive navigation bar.
+Step 3: Build the CRUD controllers for Organizations and Users (focusing on Admin creating Panitia).
+Step 4: Build the Coupon management system (Generate massal, Approval logic by Admin, and Print View using grid layout).
+Step 5: Implement the QR Scanner page integrating 'html5-qrcode' with an API endpoint to verify and claim the coupon securely.
+
+Please start with Step 1: provide the code for Models and Migrations first.
