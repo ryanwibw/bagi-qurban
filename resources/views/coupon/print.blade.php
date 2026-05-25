@@ -63,34 +63,33 @@
         /* Page Layout for A4 */
         .page-container {
             width: 210mm;
-            margin: 20px auto;
+            margin: 0 auto;
             background-color: white;
-            padding: 10mm;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10mm 5mm; /* Ruang antar kupon */
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2mm; /* Minimal gap between coupons */
+            padding: 5mm;
             box-sizing: border-box;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            justify-content: center;
         }
 
         /* Coupon Card Design */
         .coupon-canvas {
             width: 3.5in !important;
-            height: 1.5in !important;
+            height: 1.6in !important;
             min-width: 3.5in;
-            min-height: 1.5in;
+            min-height: 1.6in;
             position: relative;
             overflow: hidden;
-            border: 1px solid black;
+            border: 0.2mm solid #000;
             background-image: url('{{ asset('coupon-bg.png') }}');
-            background-size: 100% 100%; /* SAMA DENGAN SHOW.BLADE */
+            background-size: 100% 100%;
             background-repeat: no-repeat;
             background-position: center;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
             break-inside: avoid;
             box-sizing: border-box;
+            margin: 0 auto;
         }
 
         .dynamic-element {
@@ -107,20 +106,19 @@
         .qty-overlay { top: var(--qty-top); left: var(--qty-left); }
         .org-overlay { top: var(--org-top); left: var(--org-left); }
 
-        /* Content Styling - Menggunakan ukuran yang lebih kecil agar proporsional */
+        /* Content Styling */
         .org-name {
             width: 140px;
             text-align: center;
             line-height: 1.1;
         }
         .org-name h4 {
-            font-size: 6.5pt; /* Diperkecil agar pas */
+            font-size: 6.5pt;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.02em;
             color: #1e293b;
             margin: 0;
-            text-shadow: 0 1px 1px rgba(255,255,255,0.3);
         }
         .org-address {
             font-size: 4.5pt;
@@ -132,9 +130,8 @@
 
         .qr-box {
             background: white;
-            padding: 3px;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 2px;
+            border-radius: 2px;
         }
         .qr-img {
             width: var(--qr-size);
@@ -143,10 +140,9 @@
         }
 
         .sn-text {
-            font-size: 10pt; /* Diperkecil dari 12pt */
+            font-size: 10pt;
             font-weight: 900;
             color: #f1f5f9;
-            letter-spacing: -0.01em;
             font-family: monospace;
             text-shadow: 0 1px 2px rgba(0,0,0,0.6);
         }
@@ -157,7 +153,7 @@
             gap: 1px;
         }
         .qty-val {
-            font-size: 16pt; /* Diperkecil dari 20pt agar tidak "kebesaran" */
+            font-size: 16pt;
             font-weight: 900;
             color: #0f172a;
             line-height: 1;
@@ -173,21 +169,21 @@
         @media print {
             @page {
                 size: A4;
-                margin: 0; /* Menghilangkan Header/Footer Browser (Tanggal, URL, dll) */
+                margin: 5mm;
             }
             body { background-color: white; }
             .no-print { display: none; }
             .page-container {
                 margin: 0;
-                padding: 10mm; /* Memberi jarak aman dari tepi kertas fisik */
+                padding: 0;
                 box-shadow: none;
-                width: 210mm;
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: flex-start;
+                width: 100%;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1mm;
             }
             .coupon-canvas {
-                border: 1px solid black;
+                border: 0.1mm solid #ccc;
             }
         }
     </style>

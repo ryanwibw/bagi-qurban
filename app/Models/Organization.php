@@ -13,11 +13,19 @@ class Organization extends Model
         'city',
         'address',
         'logo',
+        'owner_id',
     ];
 
-    public function users(): HasMany
+    public function users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->hasMany(User::class);
+        return $this->belongsToMany(User::class)
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+
+    public function owner(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'owner_id');
     }
 
     public function coupons(): HasMany

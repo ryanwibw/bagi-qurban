@@ -12,8 +12,10 @@ class CouponController extends Controller
     public function index(Request $request)
     {
         $status = $request->get('status');
+        $orgId = session('active_organization_id');
         
         $query = Coupon::with(['creator', 'approver'])
+            ->where('organization_id', $orgId)
             ->latest();
 
         if ($status) {
@@ -27,6 +29,10 @@ class CouponController extends Controller
 
     public function show(Coupon $coupon)
     {
+        if ($coupon->organization_id != session('active_organization_id')) {
+            abort(403);
+        }
+
         $coupon->load(['creator', 'approver', 'organization']);
         return view('coupon.show', compact('coupon'));
     }
@@ -46,7 +52,7 @@ class CouponController extends Controller
 
         for ($i = 0; $i < $request->count; $i++) {
             Coupon::create([
-                'organization_id' => Auth::user()->organization_id,
+                'organization_id' => session('active_organization_id'),
                 'created_by' => Auth::id(),
                 'qr_code' => (string) Str::uuid(),
                 'quantity' => $request->quantity,
@@ -60,7 +66,7 @@ class CouponController extends Controller
 
     public function approve(Coupon $coupon)
     {
-        if (!Auth::user()->isAdmin()) {
+        if (!Auth::user()->isAdmin() || $coupon->organization_id !== session('active_organization_id')) {
             abort(403);
         }
 
@@ -79,11 +85,13 @@ class CouponController extends Controller
             abort(403);
         }
 
-        Coupon::where('status', 'pending')->update([
-            'status' => 'approved',
-            'approved_by' => Auth::id(),
-            'approved_at' => now(),
-        ]);
+        Coupon::where('organization_id', session('active_organization_id'))
+            ->where('status', 'pending')
+            ->update([
+                'status' => 'approved',
+                'approved_by' => Auth::id(),
+                'approved_at' => now(),
+            ]);
 
         return back()->with('success', 'Semua kupon pending berhasil disetujui.');
     }
@@ -91,8 +99,11 @@ class CouponController extends Controller
     public function batchPrint(Request $request)
     {
         $ids = $request->get('ids');
+        $orgId = session('active_organization_id');
         
-        $query = Coupon::with(['organization', 'creator'])->where('status', 'approved');
+        $query = Coupon::with(['organization', 'creator'])
+            ->where('organization_id', $orgId)
+            ->where('status', 'approved');
 
         if ($ids) {
             $idArray = explode(',', $ids);
@@ -119,12 +130,14 @@ class CouponController extends Controller
             'qr_code' => 'required|string',
         ]);
 
-        $coupon = Coupon::where('qr_code', $request->qr_code)->first();
+        $coupon = Coupon::where('qr_code', $request->qr_code)
+            ->where('organization_id', session('active_organization_id'))
+            ->first();
 
         if (!$coupon) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kupon tidak ditemukan atau tidak valid.'
+                'message' => 'Kupon tidak ditemukan atau tidak valid untuk organisasi Anda.'
             ], 404);
         }
 
@@ -135,7 +148,8 @@ class CouponController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => $message
+                'message' => $message,
+                'coupon_id' => $coupon->id
             ], 422);
         }
 
@@ -147,7 +161,9 @@ class CouponController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Kupon Berhasil Diklaim!',
+            'organization_name' => $coupon->organization->name,
             'data' => [
+                'id' => $coupon->id,
                 'recipient' => $coupon->recipient_name ?? 'Umum',
                 'quantity' => $coupon->quantity,
                 'weight_kg' => $coupon->weight_kg,
@@ -158,6 +174,10 @@ class CouponController extends Controller
 
     public function destroy(Coupon $coupon)
     {
+        if ($coupon->organization_id !== session('active_organization_id')) {
+            abort(403);
+        }
+
         $coupon->delete();
         return back()->with('success', 'Kupon berhasil dihapus.');
     }

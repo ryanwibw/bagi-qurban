@@ -25,14 +25,14 @@ class Coupon extends Model
     protected static function booted(): void
     {
         static::addGlobalScope('organization', function (Builder $builder) {
-            if (Auth::check()) {
-                $builder->where('organization_id', Auth::user()->organization_id);
+            if (session()->has('active_organization_id')) {
+                $builder->where('organization_id', session('active_organization_id'));
             }
         });
 
         static::creating(function ($coupon) {
-            if (Auth::check() && !$coupon->organization_id) {
-                $coupon->organization_id = Auth::user()->organization_id;
+            if (!$coupon->organization_id && session()->has('active_organization_id')) {
+                $coupon->organization_id = session('active_organization_id');
             }
         });
     }

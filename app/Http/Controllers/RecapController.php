@@ -11,12 +11,18 @@ class RecapController extends Controller
 {
     public function index(Request $request)
     {
-        $organizationId = $request->get('organization_id', Auth::user()->organization_id);
+        $activeOrgId = session('active_organization_id');
+        $organizationId = $request->get('organization_id', $activeOrgId);
         $status = $request->get('status', 'all');
 
-        // Only admins can see other organizations
-        if (!Auth::user()->isAdmin()) {
-            $organizationId = Auth::user()->organization_id;
+        // Security: Ensure user belongs to the requested organization
+        if (!Auth::user()->organizations()->where('organization_id', $organizationId)->exists()) {
+            $organizationId = $activeOrgId;
+        }
+
+        // Only admins can switch between their organizations in this view
+        if (!Auth::user()->isAdmin($organizationId)) {
+            $organizationId = $activeOrgId;
         }
 
         $query = Coupon::withoutGlobalScope('organization')
@@ -41,7 +47,7 @@ class RecapController extends Controller
             'unclaimed_count' => $coupons->whereIn('status', ['pending', 'approved'])->count(),
         ];
 
-        $organizations = Auth::user()->isAdmin() ? Organization::all() : collect([Auth::user()->organization]);
+        $organizations = Auth::user()->organizations;
         $selectedOrganization = Organization::find($organizationId);
 
         return view('recap.index', compact('coupons', 'summary', 'organizations', 'selectedOrganization'));

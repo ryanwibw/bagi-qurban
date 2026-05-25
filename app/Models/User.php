@@ -22,39 +22,42 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'organization_id',
         'name',
         'email',
         'password',
-        'role',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    public function organizations(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->belongsToMany(Organization::class)
+            ->withPivot('role')
+            ->withTimestamps();
     }
 
-    public function organization(): BelongsTo
+    public function ownedOrganizations(): HasMany
     {
-        return $this->belongsTo(Organization::class);
+        return $this->hasMany(Organization::class, 'owner_id');
+    }
+
+    public function roleInOrganization($organizationId): ?string
+    {
+        return $this->organizations()
+            ->where('organization_id', $organizationId)
+            ->first()
+            ?->pivot
+            ?->role;
+    }
+
+    public function isAdmin($organizationId = null): bool
+    {
+        $organizationId = $organizationId ?: session('active_organization_id');
+        return $this->roleInOrganization($organizationId) === 'admin';
+    }
+
+    public function isPanitia($organizationId = null): bool
+    {
+        $organizationId = $organizationId ?: session('active_organization_id');
+        return $this->roleInOrganization($organizationId) === 'panitia';
     }
 
     public function createdCoupons(): HasMany
@@ -65,15 +68,5 @@ class User extends Authenticatable
     public function approvedCoupons(): HasMany
     {
         return $this->hasMany(Coupon::class, 'approved_by');
-    }
-
-    public function isAdmin(): bool
-    {
-        return $this->role === 'admin';
-    }
-
-    public function isPanitia(): bool
-    {
-        return $this->role === 'panitia';
     }
 }

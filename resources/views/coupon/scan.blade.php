@@ -1,41 +1,66 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-bold text-2xl text-slate-800 leading-tight">
-            {{ __('Scan Kupon Qurban') }}
+            {{ __('Scan Kupon Cepat') }}
         </h2>
     </x-slot>
 
-    <div class="max-w-xl mx-auto space-y-6">
-        <!-- Scanner Container -->
-        <div class="bg-white overflow-hidden shadow-xl rounded-3xl border border-slate-200 p-4">
-            <div id="reader" class="rounded-2xl overflow-hidden border-none"></div>
-            
-            <div id="result-container" class="mt-6 hidden animate-in fade-in zoom-in duration-300">
-                <div id="result-alert" class="p-6 rounded-2xl border flex flex-col items-center text-center space-y-3">
-                    <div id="result-icon" class="w-16 h-16 rounded-full flex items-center justify-center mb-2">
-                        <!-- Icon injected via JS -->
+    <style>
+        #reader video {
+            object-fit: cover !important;
+            border-radius: 1rem;
+        }
+        /* Style for the scanning square frame if the library uses CSS for it */
+        #reader__scan_region {
+            background: rgba(0,0,0,0.1);
+        }
+    </style>
+
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Scanner (Larger) -->
+            <div class="lg:col-span-2">
+                <div class="bg-white overflow-hidden shadow-xl rounded-3xl border border-slate-200 p-4 sticky top-6">
+                    <div id="reader" class="rounded-2xl overflow-hidden border-none bg-slate-100"></div>
+                    
+                    <div class="mt-6 bg-emerald-50 border border-emerald-100 p-4 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-start gap-3">
+                            <div class="bg-emerald-100 p-1.5 rounded-lg text-emerald-700">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1 v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <p class="text-xs text-emerald-700 leading-relaxed font-medium">
+                                Scanner Aktif. Arahkan QR Code ke kotak pemindai untuk klaim otomatis.
+                            </p>
+                        </div>
+                        <div id="scanner-status">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-600">
+                                <span class="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse"></span>
+                                ON AIR
+                            </span>
+                        </div>
                     </div>
-                    <h3 id="result-title" class="text-xl font-bold"></h3>
-                    <p id="result-message" class="text-slate-600 font-medium"></p>
-                    <div id="result-details" class="w-full mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-4 text-left">
-                        <!-- Details injected via JS -->
-                    </div>
-                    <button onclick="resetScanner()" class="mt-6 w-full bg-slate-800 text-white py-3 rounded-xl font-bold hover:bg-slate-900 transition">
-                        Scan Lagi
-                    </button>
                 </div>
             </div>
-        </div>
 
-        <div class="bg-emerald-50 border border-emerald-100 p-6 rounded-2xl flex items-start gap-4">
-            <div class="bg-emerald-100 p-2 rounded-lg text-emerald-700">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1 v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </div>
-            <div>
-                <h4 class="font-bold text-emerald-900">Petunjuk Pemindaian</h4>
-                <p class="text-sm text-emerald-700 leading-relaxed mt-1">
-                    Pastikan QR Code berada di area terang dan terlihat jelas di kamera. Sistem akan otomatis memvalidasi status kupon setelah terdeteksi.
-                </p>
+            <!-- Right Column: History List (Smaller) -->
+            <div class="lg:col-span-1">
+                <div class="bg-white shadow-sm rounded-3xl border border-slate-200 overflow-hidden h-full min-h-[500px] flex flex-col">
+                    <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-lg leading-none">History</h3>
+                            <p class="text-[10px] text-slate-500 uppercase mt-1 tracking-tighter">Sesi Scan Saat Ini</p>
+                        </div>
+                        <span id="history-count" class="bg-emerald-600 text-white text-[10px] font-black px-3 py-1 rounded-full">0 KUPON</span>
+                    </div>
+                    
+                    <div id="scan-history" class="flex-1 overflow-y-auto p-4 space-y-3 max-h-[calc(100vh-300px)] bg-slate-50/30">
+                        <!-- History items will be prepended here -->
+                        <div id="empty-history" class="h-full flex flex-col items-center justify-center text-slate-400 py-20">
+                            <svg class="w-12 h-12 mb-3 opacity-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            <p class="text-xs font-bold uppercase tracking-widest opacity-30">No Data</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -44,17 +69,20 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script>
         const html5QrCode = new Html5Qrcode("reader");
-        const resultContainer = document.getElementById('result-container');
-        const resultAlert = document.getElementById('result-alert');
-        const resultIcon = document.getElementById('result-icon');
-        const resultTitle = document.getElementById('result-title');
-        const resultMessage = document.getElementById('result-message');
-        const resultDetails = document.getElementById('result-details');
-        const readerElement = document.getElementById('reader');
+        const historyContainer = document.getElementById('scan-history');
+        const emptyHistory = document.getElementById('empty-history');
+        const historyCountLabel = document.getElementById('history-count');
+        
+        // Pre-load audio to ensure they play instantly
+        const audioSuccess = new Audio('https://www.soundjay.com/buttons/sounds/button-3.mp3');
+        const audioError = new Audio('https://www.soundjay.com/buttons/sounds/button-10.mp3');
+        
+        let scannedCount = 0;
+        let lastScannedText = "";
+        let lastScannedTime = 0;
+        let isProcessing = false;
 
-        let isScanning = true;
-
-        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+        const config = { fps: 20, qrbox: { width: 300, height: 300 } };
 
         const startScanner = () => {
             html5QrCode.start(
@@ -67,18 +95,20 @@
         };
 
         async function onScanSuccess(decodedText, decodedResult) {
-            if (!isScanning) return;
-            isScanning = false;
+            const now = Date.now();
+            
+            // Reduced cooldown: 1.5 seconds
+            if (decodedText === lastScannedText && (now - lastScannedTime) < 1500) {
+                return;
+            }
 
-            // Vibrate if supported
-            if (navigator.vibrate) navigator.vibrate(100);
+            if (isProcessing) return;
 
-            // Audio Feedback
-            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-            audio.play().catch(() => {});
+            lastScannedText = decodedText;
+            lastScannedTime = now;
+            isProcessing = true;
 
-            html5QrCode.stop();
-            readerElement.classList.add('hidden');
+            if (navigator.vibrate) navigator.vibrate(50);
 
             try {
                 const response = await fetch('{{ route('coupon.claim') }}', {
@@ -91,53 +121,76 @@
                 });
 
                 const result = await response.json();
-                showResult(result);
+                
+                // Play Sound based on result
+                if (result.success) {
+                    audioSuccess.currentTime = 0;
+                    audioSuccess.play().catch(e => console.log("Audio play blocked", e));
+                } else {
+                    audioError.currentTime = 0;
+                    audioError.play().catch(e => console.log("Audio play blocked", e));
+                }
+
+                addHistoryItem(result, decodedText);
 
             } catch (error) {
-                showResult({
+                audioError.currentTime = 0;
+                audioError.play().catch(e => console.log("Audio play blocked", e));
+                
+                addHistoryItem({
                     success: false,
-                    message: 'Terjadi kesalahan sistem. Silakan coba lagi.'
-                });
+                    message: 'Koneksi terputus.'
+                }, decodedText);
+            } finally {
+                isProcessing = false;
             }
         }
 
-        function showResult(result) {
-            resultContainer.classList.remove('hidden');
+        function addHistoryItem(result, qrCode) {
+            if (emptyHistory) emptyHistory.remove();
             
+            const time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const item = document.createElement('div');
+            
+            const couponId = result.data ? result.data.id : (result.coupon_id || '???');
+            const couponNumber = `KPN-${String(couponId).padStart(5, '0')}`;
+
             if (result.success) {
-                resultAlert.className = "p-6 rounded-2xl border-2 border-emerald-200 bg-emerald-50 flex flex-col items-center text-center space-y-3";
-                resultIcon.className = "w-16 h-16 rounded-full flex items-center justify-center mb-2 bg-emerald-100 text-emerald-600 shadow-sm";
-                resultIcon.innerHTML = `<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`;
-                resultTitle.innerText = "Kupon Valid!";
-                resultTitle.className = "text-2xl font-black text-emerald-900";
-                resultMessage.innerText = result.message;
+                scannedCount++;
+                historyCountLabel.innerText = `${scannedCount} KUPON`;
                 
-                resultDetails.innerHTML = `
-                    <div>
-                        <div class="text-[10px] text-emerald-600 font-bold uppercase">Penerima</div>
-                        <div class="text-sm font-bold text-slate-800">${result.data.recipient}</div>
+                item.className = "p-3 rounded-xl border border-emerald-100 bg-white flex items-start gap-3 shadow-sm animate-in slide-in-from-right duration-300";
+                item.innerHTML = `
+                    <div class="bg-emerald-500 text-white p-1.5 rounded-lg shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                     </div>
-                    <div class="text-right">
-                        <div class="text-[10px] text-emerald-600 font-bold uppercase">Berat Daging</div>
-                        <div class="text-sm font-bold text-slate-800">${result.data.quantity} Kg</div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-xs font-black text-emerald-900">${couponNumber}</h4>
+                            <span class="text-[9px] font-bold text-slate-400 shrink-0">${time}</span>
+                        </div>
+                        <p class="text-[11px] font-bold text-slate-700 leading-tight mt-1 truncate">${result.data.recipient} (${result.data.weight_kg}kg)</p>
+                        <p class="text-[9px] font-semibold text-emerald-600 mt-0.5">BERHASIL DIKLAIM</p>
                     </div>
                 `;
             } else {
-                resultAlert.className = "p-6 rounded-2xl border-2 border-red-200 bg-red-50 flex flex-col items-center text-center space-y-3";
-                resultIcon.className = "w-16 h-16 rounded-full flex items-center justify-center mb-2 bg-red-100 text-red-600 shadow-sm";
-                resultIcon.innerHTML = `<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>`;
-                resultTitle.innerText = "Klaim Gagal";
-                resultTitle.className = "text-2xl font-black text-red-900";
-                resultMessage.innerText = result.message;
-                resultDetails.innerHTML = '';
+                item.className = "p-3 rounded-xl border border-red-100 bg-red-50 flex items-start gap-3 shadow-sm animate-in slide-in-from-right duration-300";
+                item.innerHTML = `
+                    <div class="bg-red-500 text-white p-1.5 rounded-lg shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-xs font-black text-red-900">${couponId !== '???' ? couponNumber : 'QR INVALID'}</h4>
+                            <span class="text-[9px] font-bold text-slate-400 shrink-0">${time}</span>
+                        </div>
+                        <p class="text-[10px] font-semibold text-red-700 mt-1 line-clamp-2">${result.message}</p>
+                    </div>
+                `;
             }
-        }
 
-        function resetScanner() {
-            isScanning = true;
-            resultContainer.classList.add('hidden');
-            readerElement.classList.remove('hidden');
-            startScanner();
+            historyContainer.prepend(item);
+            historyContainer.scrollTop = 0;
         }
 
         document.addEventListener('DOMContentLoaded', startScanner);

@@ -35,10 +35,36 @@
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ml-6">
+                @php
+                    $activeOrgId = session('active_organization_id');
+                    $activeOrg = \App\Models\Organization::find($activeOrgId);
+                    $role = auth()->user()->roleInOrganization($activeOrgId);
+                @endphp
+                
+                <div class="mr-4 flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-2xl px-3 py-1.5">
+                    <div class="text-right hidden lg:block">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Organisasi Aktif</p>
+                        <p class="text-sm font-black text-emerald-700 leading-tight truncate max-w-[150px]">{{ $activeOrg->name ?? 'None' }}</p>
+                    </div>
+                    
+                    @if(auth()->user()->organizations()->count() > 1)
+                    <form action="{{ route('organization.set') }}" method="POST" class="border-l border-slate-200 pl-3">
+                        @csrf
+                        <select name="organization_id" onchange="this.form.submit()" class="text-xs font-bold border-none focus:ring-0 bg-transparent py-0 pl-0 pr-6 text-slate-600 cursor-pointer hover:text-emerald-600 transition-colors">
+                            @foreach(auth()->user()->organizations as $org)
+                                <option value="{{ $org->id }}" {{ session('active_organization_id') == $org->id ? 'selected' : '' }}>
+                                    Pindah Ke: {{ $org->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </form>
+                    @endif
+                </div>
+
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-slate-500 bg-white hover:text-slate-700 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }} ({{ ucfirst(Auth::user()->role) }})</div>
+                            <div>{{ Auth::user()->name }} ({{ ucfirst($role) }})</div>
 
                             <div class="ml-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -49,6 +75,12 @@
                     </x-slot>
 
                     <x-slot name="content">
+                        @if(auth()->user()->organizations()->count() > 1)
+                        <x-dropdown-link :href="route('organization.select')">
+                            {{ __('Ganti Organisasi') }}
+                        </x-dropdown-link>
+                        @endif
+
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>

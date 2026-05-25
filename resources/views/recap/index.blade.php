@@ -11,18 +11,7 @@
     </x-slot>
 
     <div class="no-print mb-8 bg-white/60 backdrop-blur-sm p-6 rounded-2xl shadow-sm border border-slate-200/60">
-        <form method="GET" action="{{ route('recap.index') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            @if(Auth::user()->isAdmin())
-            <div>
-                <x-input-label for="organization_id" :value="__('Organisasi')" />
-                <select name="organization_id" id="organization_id" onchange="this.form.submit()" class="block mt-1 w-full border-slate-200 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl bg-white/50">
-                    @foreach($organizations as $org)
-                        <option value="{{ $org->id }}" {{ request('organization_id') == $org->id ? 'selected' : '' }}>{{ $org->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            @endif
-
+        <form method="GET" action="{{ route('recap.index') }}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <x-input-label for="status" :value="__('Status Kupon')" />
                 <select name="status" id="status" onchange="this.form.submit()" class="block mt-1 w-full border-slate-200 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl bg-white/50">
@@ -105,7 +94,7 @@
             <div>
                 <p class="mb-20">Dicetak Oleh,</p>
                 <p class="font-bold underline">{{ Auth::user()->name }}</p>
-                <p class="text-xs text-slate-500 uppercase">{{ Auth::user()->role }}</p>
+                <p class="text-xs text-slate-500 uppercase">{{ auth()->user()->roleInOrganization($selectedOrganization->id) }}</p>
             </div>
         </div>
     </div>

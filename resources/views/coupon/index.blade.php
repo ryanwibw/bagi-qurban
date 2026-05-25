@@ -15,6 +15,9 @@
                     <button onclick="printSelected()" class="bg-slate-800 text-white px-4 py-2 rounded-xl font-bold hover:bg-slate-900 transition shadow-sm text-sm">
                         Cetak Terpilih
                     </button>
+                    <a href="{{ route('coupon.print') }}" target="_blank" class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-indigo-700 transition shadow-sm text-sm">
+                        Cetak Semua
+                    </a>
                 @endif
                 <a href="{{ route('coupon.create') }}" class="bg-emerald-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-emerald-700 transition shadow-sm text-sm">
                     + Ajukan Kupon

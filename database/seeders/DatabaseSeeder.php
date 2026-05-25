@@ -22,20 +22,21 @@ class DatabaseSeeder extends Seeder
             'address' => 'Jl. Merdeka No. 1',
         ]);
 
-        User::create([
-            'organization_id' => $org->id,
+        $admin = User::create([
             'name' => 'Admin Qurban',
             'email' => 'admin@qurban.test',
             'password' => Hash::make('password'),
-            'role' => 'admin',
         ]);
 
-        User::create([
-            'organization_id' => $org->id,
+        $admin->organizations()->attach($org->id, ['role' => 'admin']);
+        $org->update(['owner_id' => $admin->id]);
+
+        $panitia = User::create([
             'name' => 'Panitia Lapangan',
             'email' => 'panitia@qurban.test',
             'password' => Hash::make('password'),
-            'role' => 'panitia',
         ]);
+
+        $panitia->organizations()->attach($org->id, ['role' => 'panitia']);
     }
 }
