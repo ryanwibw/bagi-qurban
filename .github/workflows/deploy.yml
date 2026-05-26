@@ -1,0 +1,31 @@
+name: Deploy Laravel ke cPanel
+
+on:
+  push:
+    branches:
+      - main  # Robot akan jalan setiap kali kamu push ke branch main
+
+jobs:
+  web-deploy:
+    name: 🚀 Deploy file ke server via FTP
+    runs-on: ubuntu-latest
+    steps:
+    - name: 🚚 Mengambil kode terbaru dari github
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: 📂 Sinkronisasi File ke cPanel
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        server-dir: /  # Robot akan langsung mengisi root folder yang dikunci oleh akun FTP cPanel
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/vendor/**
+          **/tests/**
+          .env
