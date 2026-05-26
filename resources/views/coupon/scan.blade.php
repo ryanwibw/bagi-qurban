@@ -74,8 +74,8 @@
         const historyCountLabel = document.getElementById('history-count');
         
         // Pre-load audio to ensure they play instantly
-        const audioSuccess = new Audio('https://www.soundjay.com/buttons/sounds/button-3.mp3');
-        const audioError = new Audio('https://www.soundjay.com/buttons/sounds/button-10.mp3');
+        const audioSuccess = new Audio('/audio/success.mp3'); // Replace with your success sound URL
+        const audioError = new Audio('/audio/error.mp3'); // Replace with your error sound URL
         
         let scannedCount = 0;
         let lastScannedText = "";
@@ -152,8 +152,9 @@
             const time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             const item = document.createElement('div');
             
-            const couponId = result.data ? result.data.id : (result.coupon_id || '???');
-            const couponNumber = `KPN-${String(couponId).padStart(5, '0')}`;
+            // Use serial_number from response
+            const serialNumber = result.data ? result.data.serial_number : (result.serial_number || '???');
+            const couponNumber = `KPN-${String(serialNumber).padStart(5, '0')}`;
 
             if (result.success) {
                 scannedCount++;
@@ -181,7 +182,7 @@
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex justify-between items-center">
-                            <h4 class="text-xs font-black text-red-900">${couponId !== '???' ? couponNumber : 'QR INVALID'}</h4>
+                            <h4 class="text-xs font-black text-red-900">${serialNumber !== '???' ? couponNumber : 'QR INVALID'}</h4>
                             <span class="text-[9px] font-bold text-slate-400 shrink-0">${time}</span>
                         </div>
                         <p class="text-[10px] font-semibold text-red-700 mt-1 line-clamp-2">${result.message}</p>

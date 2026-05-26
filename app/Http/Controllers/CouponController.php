@@ -162,7 +162,8 @@ class CouponController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $message,
-                'coupon_id' => $coupon->id
+                'coupon_id' => $coupon->id,
+                'serial_number' => $coupon->serial_number
             ], 422);
         }
 
@@ -177,6 +178,7 @@ class CouponController extends Controller
             'organization_name' => $coupon->organization->name,
             'data' => [
                 'id' => $coupon->id,
+                'serial_number' => $coupon->serial_number,
                 'recipient' => $coupon->recipient_name ?? 'Umum',
                 'quantity' => $coupon->quantity,
                 'weight_kg' => $coupon->weight_kg,
