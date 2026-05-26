@@ -36,3 +36,4 @@ jobs:
           **/vendor/**
           **/tests/**
           .env
+          dangerous-clean-slate: false
