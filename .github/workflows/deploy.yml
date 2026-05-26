@@ -20,10 +20,15 @@ jobs:
     - name: 📂 Sinkronisasi File ke cPanel
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
+        - name: 📂 Sinkronisasi File ke cPanel
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
+        port: 21  # Menegaskan port FTP standar sesuai data cPanel kamu
         server-dir: /
+        state-name: .ftp-deploy-sync-state.json # Membantu melacak file yang sukses terupload
         exclude: |
           **/.git*
           **/.git*/**
