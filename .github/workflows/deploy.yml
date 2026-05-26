@@ -10,25 +10,22 @@ jobs:
     name: 🚀 Deploy file ke server via FTP
     runs-on: ubuntu-latest
     env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Memaksa runner menggunakan Node.js 24 modern
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
     - name: 🚚 Mengambil kode terbaru dari github
-      uses: actions/checkout@v4 # Diperbarui dari v3 ke v4
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
     - name: 📂 Sinkronisasi File ke cPanel
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
-        - name: 📂 Sinkronisasi File ke cPanel
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-      with:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        port: 21  # Menegaskan port FTP standar sesuai data cPanel kamu
+        port: 21
         server-dir: /
-        state-name: .ftp-deploy-sync-state.json # Membantu melacak file yang sukses terupload
+        state-name: .ftp-deploy-sync-state.json
         exclude: |
           **/.git*
           **/.git*/**
@@ -36,4 +33,3 @@ jobs:
           **/vendor/**
           **/tests/**
           .env
-          dangerous-clean-slate: false
