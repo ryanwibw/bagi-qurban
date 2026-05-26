@@ -11,6 +11,7 @@ class Coupon extends Model
 {
     protected $fillable = [
         'organization_id',
+        'serial_number',
         'created_by',
         'approved_by',
         'recipient_name',

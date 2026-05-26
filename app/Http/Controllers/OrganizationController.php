@@ -109,4 +109,30 @@ class OrganizationController extends Controller
 
         return redirect()->route('dashboard');
     }
+
+    public function destroy(Organization $organization)
+    {
+        // Only the owner can delete the organization
+        if ($organization->owner_id != auth()->id()) {
+            abort(403, 'Hanya pemilik yang dapat menghapus organisasi ini.');
+        }
+
+        // Delete the organization
+        $organization->delete();
+
+        // If the deleted org was the active one, clear it
+        if (session('active_organization_id') == $organization->id) {
+            session()->forget('active_organization_id');
+        }
+
+        // Check if user still has other organizations
+        $nextOrg = auth()->user()->organizations()->first();
+        
+        if ($nextOrg) {
+            session(['active_organization_id' => $nextOrg->id]);
+            return redirect()->route('organization.edit')->with('success', 'Organisasi berhasil dihapus.');
+        }
+
+        return redirect()->route('dashboard')->with('success', 'Organisasi berhasil dihapus.');
+    }
 }

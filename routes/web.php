@@ -15,6 +15,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Organization Selection & Creation
     Route::get('/organization/select', [OrganizationController::class, 'select'])->name('organization.select');
     Route::post('/organization/set', [OrganizationController::class, 'set'])->name('organization.set');
+    Route::get('/organization/set', function() { return redirect()->route('organization.select'); });
     Route::get('/organization/create', [OrganizationController::class, 'create'])->name('organization.create');
     Route::post('/organization', [OrganizationController::class, 'store'])->name('organization.store');
 
@@ -46,6 +47,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Organization Profile
         Route::get('/organization', [OrganizationController::class, 'edit'])->name('organization.edit');
         Route::patch('/organization', [OrganizationController::class, 'update'])->name('organization.update');
+        Route::delete('/organization/{organization}', [OrganizationController::class, 'destroy'])->name('organization.destroy');
 
         // Recapitulation
         Route::get('/recapitulation', [\App\Http\Controllers\RecapController::class, 'index'])->name('recap.index');

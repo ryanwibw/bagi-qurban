@@ -12,6 +12,7 @@ class CouponController extends Controller
     public function index(Request $request)
     {
         $status = $request->get('status');
+        $search = $request->get('search');
         $orgId = session('active_organization_id');
         
         $query = Coupon::with(['creator', 'approver'])
@@ -20,6 +21,10 @@ class CouponController extends Controller
 
         if ($status) {
             $query->where('status', $status);
+        }
+
+        if ($search) {
+            $query->where('serial_number', 'like', "%{$search}%");
         }
 
         $coupons = $query->paginate(20)->withQueryString();
@@ -45,17 +50,20 @@ class CouponController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'count' => 'required|integer|min:1|max:100',
-            'quantity' => 'required|integer|min:1',
+            'count' => 'required|integer|min:1',
             'weight_kg' => 'required|numeric|min:0.1',
         ]);
 
+        $orgId = session('active_organization_id');
+        $lastSerial = Coupon::where('organization_id', $orgId)->max('serial_number') ?? 0;
+
         for ($i = 0; $i < $request->count; $i++) {
             Coupon::create([
-                'organization_id' => session('active_organization_id'),
+                'organization_id' => $orgId,
+                'serial_number' => $lastSerial + 1 + $i,
                 'created_by' => Auth::id(),
                 'qr_code' => (string) Str::uuid(),
-                'quantity' => $request->quantity,
+                'quantity' => 1,
                 'weight_kg' => $request->weight_kg,
                 'status' => 'pending',
             ]);
@@ -79,35 +87,40 @@ class CouponController extends Controller
         return back()->with('success', 'Kupon berhasil disetujui.');
     }
 
-    public function approveAll()
+    public function approveAll(Request $request)
     {
-        if (!Auth::user()->isAdmin()) {
-            abort(403);
+        $query = Coupon::where('organization_id', session('active_organization_id'))
+            ->where('status', 'pending');
+
+        if (!$request->has('all_selected')) {
+            $ids = $request->input('ids');
+            if ($ids) $query->whereIn('id', $ids);
         }
 
-        Coupon::where('organization_id', session('active_organization_id'))
-            ->where('status', 'pending')
-            ->update([
-                'status' => 'approved',
-                'approved_by' => Auth::id(),
-                'approved_at' => now(),
-            ]);
+        $query->update([
+            'status' => 'approved',
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ]);
 
-        return back()->with('success', 'Semua kupon pending berhasil disetujui.');
+        return back()->with('success', 'Kupon terpilih berhasil disetujui.');
     }
 
     public function batchPrint(Request $request)
     {
-        $ids = $request->get('ids');
         $orgId = session('active_organization_id');
         
         $query = Coupon::with(['organization', 'creator'])
             ->where('organization_id', $orgId)
             ->where('status', 'approved');
 
-        if ($ids) {
-            $idArray = explode(',', $ids);
+        if ($request->has('all_selected')) {
+            // Print all approved coupons in org
+        } elseif ($request->has('ids')) {
+            $idArray = explode(',', $request->input('ids'));
             $query->whereIn('id', $idArray);
+        } else {
+            return redirect()->route('coupon.index')->with('error', 'Tidak ada kupon yang dipilih.');
         }
 
         $coupons = $query->get();
@@ -172,13 +185,23 @@ class CouponController extends Controller
         ]);
     }
 
-    public function destroy(Coupon $coupon)
+    public function destroy(Request $request, $id = null)
     {
-        if ($coupon->organization_id !== session('active_organization_id')) {
-            abort(403);
+        $query = Coupon::where('organization_id', session('active_organization_id'));
+
+        if (!$request->has('all_selected')) {
+            $ids = $request->input('ids', $id ? [$id] : []);
+            if (empty($ids)) return back();
+            $query->whereIn('id', $ids);
         }
 
-        $coupon->delete();
-        return back()->with('success', 'Kupon berhasil dihapus.');
+        // Prevent deleting claimed coupons
+        $query->where('status', '!=', 'claimed');
+
+        $deletedCount = $query->delete();
+        
+        $message = $deletedCount > 0 ? 'Kupon berhasil dihapus.' : 'Tidak ada kupon yang dihapus (kupon berstatus claimed tidak bisa dihapus).';
+
+        return back()->with('success', $message);
     }
 }

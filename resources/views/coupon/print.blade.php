@@ -225,13 +225,13 @@
 
                 <!-- 3. Serial Number -->
                 <div class="dynamic-element sn-overlay">
-                    <span class="sn-text">{{ str_pad($coupon->id, 5, '0', STR_PAD_LEFT) }}</span>
+                    <span class="sn-text">{{ str_pad($coupon->serial_number, 5, '0', STR_PAD_LEFT) }}</span>
                 </div>
 
-                <!-- 4. Quantity -->
+                <!-- 4. Weight -->
                 <div class="dynamic-element qty-overlay">
                     <div class="qty-box">
-                        <span class="qty-val">{{ $coupon->quantity }}</span>
+                        <span class="qty-val">{{ $coupon->weight_kg + 0 }}</span>
                         <span class="qty-unit">KG</span>
                     </div>
                 </div>

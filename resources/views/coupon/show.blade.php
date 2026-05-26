@@ -14,7 +14,7 @@
         /* Koordinat Default - Disesuaikan untuk rasio 3.5 x 1.5 (Landscape) */
         :root {
             --qr-top: 50%;
-            --qr-left: 15%;
+            --qr-left: 14%;
             --qr-size: 120px;
 
             --sn-top: 67%;
@@ -97,7 +97,7 @@
 
                     <!-- 1. Organization Name Overlay -->
                     <div class="dynamic-element org-overlay w-full text-center leading-none">
-                        <h4 class="text-xs font-bold uppercase tracking-widest text-slate-800 drop-shadow-sm mb-0">
+                        <h4 class="text-xs font-bold uppercase text-slate-800 drop-shadow-sm mb-0">
                             {{ $coupon->organization->name }}
                         </h4>
                         <div class="text-[7px] font-medium text-slate-500 tracking-tight mt-0.5 opacity-80 leading-tight px-10">
@@ -116,14 +116,14 @@
                     <!-- 3. Serial Number Overlay -->
                     <div class="dynamic-element sn-overlay">    
                             <span class="text-[15px] font-semibold font-black text-gray-100 tracking-tighter">
-                                {{ str_pad($coupon->id, 5, '0', STR_PAD_LEFT) }}
+                                {{ str_pad($coupon->serial_number, 5, '0', STR_PAD_LEFT) }}
                             </span>
                     </div>
 
                     <!-- 4. Quantity Overlay -->
                     <div class="dynamic-element qty-overlay">
                         <div class="text-center flex flex-row items-baseline gap-1">
-                            <div class="text-2xl font-black text-slate-900 leading-none">{{ $coupon->quantity }}</div>
+                            <div class="text-2xl font-black text-slate-900 leading-none">{{ $coupon->weight_kg + 0 }}</div>
                             <div class="text-[8px] font-bold text-slate-500">KG</div>
                         </div>
                     </div>
@@ -142,11 +142,11 @@
                 <div class="p-6 space-y-4">
                     <div class="grid grid-cols-2 gap-4 pb-4 border-b border-slate-50">
                         <div class="text-sm text-slate-500">Nomor Kupon</div>
-                        <div class="text-sm font-bold text-slate-900 text-right">KPN-{{ str_pad($coupon->id, 5, '0', STR_PAD_LEFT) }}</div>
+                        <div class="text-sm font-bold text-slate-900 text-right">KPN-{{ str_pad($coupon->serial_number, 5, '0', STR_PAD_LEFT) }}</div>
                     </div>
                     <div class="grid grid-cols-2 gap-4 pb-4 border-b border-slate-50">
                         <div class="text-sm text-slate-500">Berat Daging</div>
-                        <div class="text-sm font-bold text-emerald-600 text-right">{{ $coupon->quantity }} Kg</div>
+                        <div class="text-sm font-bold text-emerald-600 text-right">{{ $coupon->weight_kg + 0 }} Kg</div>
                     </div>
                 </div>
             </div>

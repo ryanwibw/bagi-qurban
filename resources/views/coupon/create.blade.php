@@ -12,22 +12,14 @@
             <!-- Number of Coupons -->
             <div>
                 <x-input-label for="count" :value="__('Jumlah Kupon yang Dibuat')" class="text-slate-700 font-semibold" />
-                <x-text-input id="count" class="block mt-1 w-full border-slate-200 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl" type="number" name="count" :value="old('count', 10)" required min="1" max="100" autofocus />
-                <p class="mt-2 text-xs text-slate-500 italic">Maksimal 100 kupon sekali generate.</p>
+                <x-text-input id="count" class="block mt-1 w-full border-slate-200 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl" type="number" name="count" :value="old('count', 10)" required min="1" autofocus />
                 <x-input-error :messages="$errors->get('count')" class="mt-2" />
-            </div>
-
-            <!-- Quantity per Coupon -->
-            <div>
-                <x-input-label for="quantity" :value="__('Jumlah Paket per Kupon')" class="text-slate-700 font-semibold" />
-                <x-text-input id="quantity" class="block mt-1 w-full border-slate-200 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl" type="number" name="quantity" :value="old('quantity', 1)" required min="1" />
-                <x-input-error :messages="$errors->get('quantity')" class="mt-2" />
             </div>
 
             <!-- Weight per Coupon -->
             <div>
-                <x-input-label for="weight_kg" :value="__('Berat Daging per Paket (Kg)')" class="text-slate-700 font-semibold" />
-                <x-text-input id="weight_kg" class="block mt-1 w-full border-slate-200 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl" type="number" step="0.01" name="weight_kg" :value="old('weight_kg', 1.00)" required min="0.1" />
+                <x-input-label for="weight_kg" :value="__('Berat Daging per Kupon (Kg)')" class="text-slate-700 font-semibold" />
+                <x-text-input id="weight_kg" class="block mt-1 w-full border-slate-200 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl" type="number" step="0.1" name="weight_kg" :value="old('weight_kg', 1.0)" required min="0.1" />
                 <x-input-error :messages="$errors->get('weight_kg')" class="mt-2" />
             </div>
 
